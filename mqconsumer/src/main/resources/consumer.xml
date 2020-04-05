@@ -1,0 +1,32 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:rabbit="http://www.springframework.org/schema/rabbit"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/rabbit
+	http://www.springframework.org/schema/rabbit/spring-rabbit-1.4.xsd
+	http://www.springframework.org/schema/beans
+	http://www.springframework.org/schema/beans/spring-beans-4.1.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <context:property-placeholder  location="mq.properties" />
+    <!-- 配置连接工厂 -->
+    <rabbit:connection-factory id="connectionFactory"
+                               host="${mq.host}" port="${mq.port}" username="${mq.username}" password="${mq.password}" />
+
+    <!-- 定义mq管理 -->
+    <rabbit:admin connection-factory="connectionFactory" />
+
+    <!-- 声明队列 -->
+    <rabbit:queue name="que_xie" auto-declare="true" durable="true" />
+    <rabbit:queue name="que_yang" auto-declare="true" durable="true" />
+
+    <!-- 定义消费者 -->
+    <bean name="xieHandler" class="com.xie.XieHandler" />
+    <bean name="yangHandler" class="com.xie.YangHandler" />
+
+    <!-- 定义消费者监听队列 -->
+    <rabbit:listener-container
+            connection-factory="connectionFactory">
+        <rabbit:listener ref="xieHandler" queues="que_xie" />
+        <rabbit:listener ref="yangHandler" queues="que_yang" />
+    </rabbit:listener-container>
+
+</beans>
